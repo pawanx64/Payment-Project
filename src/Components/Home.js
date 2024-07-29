@@ -5,8 +5,8 @@ import { auth, signOut } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { loadStripe } from '@stripe/stripe-js';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { Elements } from '@stripe/react-stripe-js'; // Import Elements
-// Load Stripe outside of a component’s render to avoid recreating the `loadStripe` function on every render.
+import { Elements } from '@stripe/react-stripe-js';
+
 const stripePromise = loadStripe('your-stripe-public-key');
 
 export const Home = () => {
@@ -21,6 +21,12 @@ export const Home = () => {
     // Set up an authentication state observer
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (!currentUser) {
+        // Reset state if user is not logged in
+        setCoupon('');
+        setAmount(0);
+        setPaymentMethod('');
+      }
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
@@ -34,14 +40,16 @@ export const Home = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUser(null);
+      // Reset state on logout
+      setCoupon('');
+      setAmount(0);
+      setPaymentMethod('');
     } catch (error) {
       console.error('Error logging out:', error.message);
     }
   };
 
   const handleCouponApply = () => {
-    // Example coupon validation and amount setting
     if (coupon === 'edu24') {
       setAmount(100); // Set the amount for the coupon
     } else {
@@ -176,7 +184,6 @@ export const Home = () => {
         {paymentMethod === 'stripe' && (
           <section className="p-4">
             <Elements stripe={stripePromise}>
-              {/* Replace with your checkout form component */}
               <CheckoutForm amount={amount} />
             </Elements>
           </section>
