@@ -16,6 +16,13 @@ export const Home = () => {
   const [coupon, setCoupon] = useState('');
   const [amount, setAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const courses = [
+    { id: 1, name: 'Course 1', price: 100 },
+    { id: 2, name: 'Course 2', price: 150 },
+    { id: 3, name: 'Course 3', price: 200 },
+  ];
 
   useEffect(() => {
     // Set up an authentication state observer
@@ -26,6 +33,7 @@ export const Home = () => {
         setCoupon('');
         setAmount(0);
         setPaymentMethod('');
+        setSelectedCourse(null);
       }
     });
 
@@ -44,6 +52,7 @@ export const Home = () => {
       setCoupon('');
       setAmount(0);
       setPaymentMethod('');
+      setSelectedCourse(null);
     } catch (error) {
       console.error('Error logging out:', error.message);
     }
@@ -51,7 +60,7 @@ export const Home = () => {
 
   const handleCouponApply = () => {
     if (coupon === 'edu24') {
-      setAmount(100); // Set the amount for the coupon
+      setAmount(selectedCourse.price - 20); // Apply a discount for the coupon
     } else {
       alert('Invalid coupon code');
     }
@@ -59,6 +68,11 @@ export const Home = () => {
 
   const handlePayment = (method) => {
     setPaymentMethod(method);
+  };
+
+  const handleBuyCourse = (course) => {
+    setSelectedCourse(course);
+    setAmount(course.price);
   };
 
   return (
@@ -99,21 +113,44 @@ export const Home = () => {
       {/* Main Content */}
       <main className="p-4 md:p-8 flex-grow">
         {/* Hero Section */}
-        <section className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Empower Your Learning{' '}
-            <span className="text-blue-600">With Our EdTech Solutions</span>
-          </h2>
-          <p className="mt-4 text-gray-600">
-            Join our community and unlock the potential within you. Learn at your own pace with our tailored courses.
-          </p>
-          <button className="mt-6 bg-purple-600 text-white px-6 py-3 rounded">
-            Get Started
-          </button>
-        </section>
+        {!user && (
+          <section className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Empower Your Learning{' '}
+              <span className="text-blue-600">With Our EdTech Solutions</span>
+            </h2>
+            <p className="mt-4 text-gray-600">
+              Join our community and unlock the potential within you. Learn at your own pace with our tailored courses.
+            </p>
+            <button className="mt-6 bg-purple-600 text-white px-6 py-3 rounded">
+              Get Started
+            </button>
+          </section>
+        )}
+
+        {/* Courses Section */}
+        {user && (
+          <section className="text-center mb-8">
+            <h3 className="text-2xl font-bold mb-4">Our Courses</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {courses.map((course) => (
+                <div key={course.id} className="bg-white shadow p-4 rounded">
+                  <h4 className="text-xl font-bold mb-2">{course.name}</h4>
+                  <p className="text-gray-600 mb-2">Price: ${course.price}</p>
+                  <button
+                    onClick={() => handleBuyCourse(course)}
+                    className="bg-blue-600 text-white px-6 py-2 rounded"
+                  >
+                    Buy
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Payment Section */}
-        {user && (
+        {user && selectedCourse && (
           <section className="text-center bg-gray-100 p-4 md:p-8 rounded">
             <h3 className="text-2xl font-bold mb-4">Secure Your Spot</h3>
             <p className="text-gray-600 mb-4">
